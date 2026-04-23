@@ -37,9 +37,19 @@
   "packageManager": "pnpm@10.15.0",
   "pnpm": {
     "supportedArchitectures": {
-      "os": ["current", "linux"],
-      "cpu": ["current", "x64", "arm64"],
-      "libc": ["current", "glibc"]
+      "os": [
+        "current",
+        "linux"
+      ],
+      "cpu": [
+        "current",
+        "x64",
+        "arm64"
+      ],
+      "libc": [
+        "current",
+        "glibc"
+      ]
     }
   }
 }

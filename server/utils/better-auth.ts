@@ -29,6 +29,7 @@ if (!env.SYSTEM_ADMIN_EMAILS) {
 const hasGoogle = !!(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET)
 const hasGithub = !!(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET)
 const hasOAuth  = hasGoogle || hasGithub
+const hasResend = !!env.RESEND_API_KEY
 
 function parseBool(v: string | undefined): boolean | undefined {
   if (v === undefined) return undefined
@@ -36,11 +37,39 @@ function parseBool(v: string | undefined): boolean | undefined {
 }
 
 const emailLoginEnabled = parseBool(env.AUTH_EMAIL_ENABLED) ?? !hasOAuth
+// Verification auto-activates when Resend is configured; can be force-toggled.
+const emailVerificationEnabled = parseBool(env.AUTH_EMAIL_VERIFICATION) ?? (emailLoginEnabled && hasResend)
 
 if (!hasOAuth && !emailLoginEnabled) {
   throw new Error(
     '[auth] No sign-in method configured. Enable OAuth (GOOGLE_CLIENT_ID / GITHUB_CLIENT_ID) or set AUTH_EMAIL_ENABLED=true.',
   )
+}
+
+if (emailVerificationEnabled && !hasResend) {
+  logger.warn('AUTH_EMAIL_VERIFICATION is enabled but RESEND_API_KEY is not set — verification mails will fail.')
+}
+
+// Use Resend's REST API directly instead of the SDK — the SDK pulls in
+// @react-email/render which isn't resolvable on Cloudflare Workers.
+const emailFrom = env.RESEND_FROM ?? 'onboarding@resend.dev'
+
+async function sendEmailViaResend(to: string, subject: string, html: string): Promise<void> {
+  const apiKey = env.RESEND_API_KEY
+  if (!apiKey) return
+  const res = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ from: emailFrom, to, subject, html }),
+  })
+  if (!res.ok) {
+    const text = await res.text().catch(() => '')
+    logger.error(`resend send failed (${res.status}): ${text.slice(0, 500)}`)
+    throw new Error(`resend send failed with status ${res.status}`)
+  }
 }
 
 const socialProviders: Record<string, { clientId: string; clientSecret: string }> = {}
@@ -50,8 +79,21 @@ if (hasGithub) socialProviders.github = { clientId: env.GITHUB_CLIENT_ID!, clien
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: 'pg' }),
   emailAndPassword: emailLoginEnabled
-    ? { enabled: true, requireEmailVerification: false }
+    ? { enabled: true, requireEmailVerification: emailVerificationEnabled }
     : { enabled: false },
+  emailVerification: emailVerificationEnabled
+    ? {
+        sendOnSignUp: true,
+        autoSignInAfterVerification: true,
+        sendVerificationEmail: async ({ user, url }) => {
+          await sendEmailViaResend(
+            user.email,
+            'Verify your email',
+            `<p>Hi ${user.name || user.email},</p><p>Click <a href="${url}">here</a> to verify your email for deploy-test.</p>`,
+          )
+        },
+      }
+    : undefined,
   socialProviders,
   plugins: [admin()],
   databaseHooks: {
@@ -72,5 +114,5 @@ export const authConfig = {
   google: hasGoogle,
   github: hasGithub,
   email: emailLoginEnabled,
-  emailVerification: false,
+  emailVerification: emailVerificationEnabled,
 }

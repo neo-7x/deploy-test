@@ -158,12 +158,14 @@ async function addItem() {
             <button
               v-if="authCfg?.google"
               class="w-full px-4 py-2 border border-neutral-200 rounded text-sm hover:bg-neutral-50"
+              @click="authClient.signIn.social({ provider: 'google', callbackURL: '/' })"
             >
               Continue with Google
             </button>
             <button
               v-if="authCfg?.github"
               class="w-full px-4 py-2 border border-neutral-200 rounded text-sm hover:bg-neutral-50"
+              @click="authClient.signIn.social({ provider: 'github', callbackURL: '/' })"
             >
               Continue with GitHub
             </button>
