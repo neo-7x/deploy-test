@@ -46,16 +46,16 @@
         "description": "Session / cookie encryption secret. **Required**. Generate a 32+ char random string with `openssl rand -hex 32`."
       },
       "SYSTEM_ADMIN_EMAILS": {
-        "description": "Comma-separated emails. The **first** sign-up with a matching email is auto-promoted to admin. Example: `you@example.com`. Change before sharing the deploy URL."
+        "description": "Comma-separated emails. The **first** sign-up with a matching email is auto-promoted to admin. Default: `admin@admin.local` (use this to claim admin right after deploy; then change it to your real email). Example: `you@example.com`."
       },
       "GOOGLE_CLIENT_ID": {
-        "description": "Optional. Google OAuth client ID. Create at [console.cloud.google.com](https://console.cloud.google.com/auth/clients/create) with redirect `https://<your-worker>.workers.dev/api/auth/callback/google`."
+        "description": "Optional. Google OAuth client ID. Create at [console.cloud.google.com](https://console.cloud.google.com/auth/clients/create). Redirect URI: `{your-deploy-url}/api/auth/callback/google` (use the final URL you'll reach the service at — your workers.dev URL or your custom domain)."
       },
       "GOOGLE_CLIENT_SECRET": {
         "description": "Optional. Paired with `GOOGLE_CLIENT_ID`."
       },
       "GITHUB_CLIENT_ID": {
-        "description": "Optional. GitHub OAuth client ID. Create at [github.com/settings/applications/new](https://github.com/settings/applications/new) with callback `https://<your-worker>.workers.dev/api/auth/callback/github`."
+        "description": "Optional. GitHub OAuth client ID. Create at [github.com/settings/applications/new](https://github.com/settings/applications/new). Callback URL: `{your-deploy-url}/api/auth/callback/github` (use the final URL you'll reach the service at — your workers.dev URL or your custom domain)."
       },
       "GITHUB_CLIENT_SECRET": {
         "description": "Optional. Paired with `GITHUB_CLIENT_ID`."
