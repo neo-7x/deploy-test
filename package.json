@@ -37,10 +37,10 @@
   "cloudflare": {
     "bindings": {
       "POSTGRES": {
-        "description": "Hyperdrive config pointing at your Postgres. [Create one first](https://developers.cloudflare.com/hyperdrive/) with `wrangler hyperdrive create`, then select it here."
+        "description": "Hyperdrive config pointing at your Postgres. Provide your own Postgres or use [Neon](https://console.neon.tech/)'s free tier. Example connection string: `postgres://username:password@host:port/database`."
       },
       "DATABASE_URL": {
-        "description": "**Build-time only.** Used during `pnpm migrate` to run schema migrations. Must point at the **same Postgres** as the `POSTGRES` Hyperdrive binding above. At runtime the Worker reads through Hyperdrive."
+        "description": "Must point at the **same Postgres** connection string as the Hyperdrive binding above. Used during build time for db migrations"
       },
       "BETTER_AUTH_SECRET": {
         "description": "Session / cookie encryption secret. **Required**. Generate with `openssl rand -hex 32` or use this [online generator](https://numbergenerator.org/random-32-digit-hex-codes-generator)."
