@@ -6,6 +6,7 @@ interface Item {
   title: string
   description: string
   authorId: string
+  authorName: string | null
   createdAt: string
 }
 
@@ -114,7 +115,7 @@ async function addItem() {
         <li v-for="row in itemsRes.data" :key="row.id" class="py-3">
           <div class="font-medium">{{ row.title }}</div>
           <div class="text-sm text-neutral-600 mt-1">{{ row.description }}</div>
-          <div class="text-xs text-neutral-400 mt-1">by {{ row.authorId }} · {{ new Date(row.createdAt).toLocaleString() }}</div>
+          <div class="text-xs text-neutral-400 mt-1">by {{ row.authorName || row.authorId }} · {{ new Date(row.createdAt).toLocaleString() }}</div>
         </li>
       </ul>
       <p v-else class="text-sm text-neutral-500">No items yet.</p>
