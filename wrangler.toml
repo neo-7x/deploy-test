@@ -1,41 +1,38 @@
 name = "deploy-test"
 main = "./.output/server/index.mjs"
-compatibility_date = "2025-07-15"
+# 2026-01-20+ auto-enables node:fs and adds built-in .sql text rule.
+compatibility_date = "2026-01-20"
 compatibility_flags = ["nodejs_compat"]
+
+# Pull every .sql file and the migrations journal under base_dir
+# (= the directory of `main`, i.e. ./.output/server/) into the deployed
+# Worker as bundle modules. Combined with node:fs, this exposes them under
+# /bundle/... at runtime so Drizzle's migrate({ migrationsFolder }) can
+# read them natively. .sql has a built-in Text rule since 2026-01-20, but
+# _journal.json needs an explicit rule.
+find_additional_modules = true
+
+[[rules]]
+type = "Text"
+globs = ["**/_journal.json"]
+fallthrough = true
 
 # Hyperdrive pools + caches Postgres connections at the edge — required for
 # Workers since they can't hold long-lived TCP pools of their own.
 #
-# Before deploy, create the binding:
-#   wrangler hyperdrive create deploy-test \
-#     --connection-string="postgresql://USER:PASS@HOST:5432/DB"
-# then paste the returned id below.
+# The Deploy Button flow walks the user through creating a Hyperdrive config
+# against their own Postgres (e.g. Neon) and binds the generated id here.
+# Runtime code reads `env.POSTGRES.connectionString` — there is no separate
+# DATABASE_URL secret to configure.
 [[hyperdrive]]
 binding = "POSTGRES"
 id = "dc6fb35f7e294fe5abafccacf7cf6b53"
 
-# All env vars live here as plaintext [vars] with empty defaults so the
-# Deploy Button form renders them as plain text inputs (the user can see
-# what they're typing) rather than encrypted-secret masked inputs.
-#
-# Trade-off: CF's form won't enforce "required" on any of these — the user
-# could click through leaving DATABASE_URL / BETTER_AUTH_SECRET /
-# SYSTEM_ADMIN_EMAILS blank. Build-time/runtime assertions will catch this
-# later (drizzle-kit will fail on empty DATABASE_URL; better-auth will
-# throw on empty BETTER_AUTH_SECRET). Users who want their values to live
-# as actual Secrets can rotate them post-deploy via the dashboard.
-[vars]
-DATABASE_URL = ""
-BETTER_AUTH_SECRET = ""
-SYSTEM_ADMIN_EMAILS = ""
-GOOGLE_CLIENT_ID = ""
-GOOGLE_CLIENT_SECRET = ""
-GITHUB_CLIENT_ID = ""
-GITHUB_CLIENT_SECRET = ""
-AUTH_EMAIL_ENABLED = ""
-RESEND_API_KEY = ""
-RESEND_FROM = ""
-AUTH_EMAIL_VERIFICATION = ""
+# Secrets (BETTER_AUTH_SECRET, SYSTEM_ADMIN_EMAILS, optional OAuth/Resend keys)
+# are NOT declared here — putting them under [vars] would persist them as
+# plaintext in the user's forked repository. They live in .dev.vars.example
+# instead, which the Deploy Button surfaces as masked "secret" inputs and
+# uploads as Worker Secrets (encrypted, never written back to the fork).
 
 [assets]
 directory = "./.output/public/"

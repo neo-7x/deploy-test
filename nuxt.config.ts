@@ -11,6 +11,11 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxtjs/tailwindcss',
     '@nuxthub/core',
+    // CF Workers lack a real startup phase, so the usual "migrate-before-listen"
+    // pattern doesn't work. This module adds a /setup page + /api/_migrate
+    // endpoints + a request middleware that redirects unmigrated requests.
+    // No-op on node-server / vercel presets — those paths don't exist there.
+    './modules/cf-setup/module',
   ],
 
   css: ['~/assets/css/tailwind.css'],
@@ -28,6 +33,17 @@ export default defineNuxtConfig({
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       ],
+    },
+  },
+
+  // Nitro's cloudflare-module preset polyfills node:fs via unenv. Those
+  // stubs throw "not implemented" for readdirSync/statSync, hiding CF
+  // Workers' native node:fs (2025-09-01+) from our code. Mark them as
+  // externals so Nitro leaves the import alone and CF Workers serves its
+  // own node:fs at runtime.
+  nitro: {
+    unenv: {
+      external: ['node:fs', 'node:fs/promises', 'node:path', 'node:process'],
     },
   },
 })
