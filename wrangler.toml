@@ -3,12 +3,17 @@ main = "./.output/server/index.mjs"
 compatibility_date = "2025-07-15"
 compatibility_flags = ["nodejs_compat"]
 
+# CF Workers Builds hook — CF runs `pnpm install && pnpm build:cf` before
+# `wrangler deploy` so the cloudflare-module preset output lands in .output/.
+[build]
+command = "pnpm build:cf"
+
 # Runtime secrets are set via `wrangler secret put` or the CF dashboard:
 #   DATABASE_URL
 #   BETTER_AUTH_SECRET
 #   SEED_DEFAULT_ADMIN (optional)
 #
-# To bind to a Hyperdrive for Postgres instead of a public DATABASE_URL:
+# To bind a Hyperdrive for Postgres instead of a public DATABASE_URL:
 # [[hyperdrive]]
 # binding = "HYPERDRIVE"
 # id = "<your-hyperdrive-id>"
