@@ -11,18 +11,16 @@ const env = process.env
 const logger = consola.withTag('auth')
 
 // First-admin-wins: whichever sign-up lands an email that matches this list
-// becomes role=admin on user creation. Default points at `admin@local` so the
-// PoC is usable before the operator customizes it — change this to your own
-// email before inviting anyone.
-const DEFAULT_ADMIN_EMAIL = 'admin@admin.local'
-const systemAdminEmails = (env.SYSTEM_ADMIN_EMAILS ?? DEFAULT_ADMIN_EMAIL)
+// becomes role=admin on user creation. No default — the operator must set
+// SYSTEM_ADMIN_EMAILS explicitly; otherwise no one is auto-promoted.
+const systemAdminEmails = (env.SYSTEM_ADMIN_EMAILS ?? '')
   .split(',')
   .map(s => s.trim())
   .filter(Boolean)
 
-if (!env.SYSTEM_ADMIN_EMAILS) {
+if (systemAdminEmails.length === 0) {
   logger.warn(
-    `SYSTEM_ADMIN_EMAILS is unset. Falling back to '${DEFAULT_ADMIN_EMAIL}' — sign up with that email to claim admin, or set SYSTEM_ADMIN_EMAILS to your own email before exposing this deploy publicly.`,
+    'SYSTEM_ADMIN_EMAILS is unset or empty. No user will be auto-promoted to admin. Set it to your email to claim admin on first sign-up.',
   )
 }
 

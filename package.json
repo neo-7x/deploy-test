@@ -43,10 +43,10 @@
         "description": "**Build-time only.** Used during `pnpm migrate` to run schema migrations. Must point at the **same Postgres** as the `POSTGRES` Hyperdrive binding above. At runtime the Worker reads through Hyperdrive."
       },
       "BETTER_AUTH_SECRET": {
-        "description": "Session / cookie encryption secret. **Required**. Generate a 32+ char random string with `openssl rand -hex 32`."
+        "description": "Session / cookie encryption secret. **Required**. Generate with `openssl rand -hex 32` or use this [online generator](https://numbergenerator.org/random-32-digit-hex-codes-generator)."
       },
       "SYSTEM_ADMIN_EMAILS": {
-        "description": "Comma-separated emails. The **first** sign-up with a matching email is auto-promoted to admin. Default: `admin@admin.local`. Change before sharing the deploy URL."
+        "description": "Comma-separated emails. **Required**. The first sign-up with a matching email is auto-promoted to admin. Example: `you@example.com`."
       },
       "GOOGLE_CLIENT_ID": {
         "description": "Optional. Google OAuth client ID. Create at [console.cloud.google.com](https://console.cloud.google.com/auth/clients/create) with redirect `{your-url}/api/auth/callback/google`."
