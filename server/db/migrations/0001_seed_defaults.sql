@@ -13,7 +13,7 @@ ON CONFLICT ("id") DO NOTHING;
 INSERT INTO "item" ("id", "author_id", "title", "description", "created_at", "updated_at")
 SELECT * FROM (VALUES
   ('00000000-0000-4000-d0e1-000000000001'::uuid, 'system', 'Your deploy is live',        'If you can see this row, migrations ran and the database is wired up correctly.', now(), now()),
-  ('00000000-0000-4000-d0e1-000000000002'::uuid, 'system', 'Next: sign in',              'Click the Sign in button. The default admin (if you set SEED_DEFAULT_ADMIN=true) is admin@deploy-test.local / changedefaultpassword.', now(), now()),
+  ('00000000-0000-4000-d0e1-000000000002'::uuid, 'system', 'Next: sign up',              'Click the Sign in button, then "Sign up". Register with any email in SYSTEM_ADMIN_EMAILS (defaults to admin@admin.local) to be promoted to admin automatically — no default password, no seeded account.', now(), now()),
   ('00000000-0000-4000-d0e1-000000000003'::uuid, 'system', 'Then: create a real item',   'Once signed in, POST to /api/items with a title and description. That round-trips through Drizzle into the database.', now(), now())
 ) AS v(id, author_id, title, description, created_at, updated_at)
 WHERE NOT EXISTS (SELECT 1 FROM "item");

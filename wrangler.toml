@@ -17,6 +17,12 @@ id = "dc6fb35f7e294fe5abafccacf7cf6b53"
 # BETTER_AUTH_SECRET is set via `wrangler secret put BETTER_AUTH_SECRET`.
 # DATABASE_URL is NOT needed on Cloudflare — the Hyperdrive binding above
 # replaces it.
+#
+# SYSTEM_ADMIN_EMAILS controls who becomes admin on first sign-up. Default
+# falls back to `admin@local` when unset. Override to your own email via:
+#   wrangler secret put SYSTEM_ADMIN_EMAILS   (or set it as a plain var)
+# [vars]
+# SYSTEM_ADMIN_EMAILS = "you@example.com"
 
 [assets]
 directory = "./.output/public/"

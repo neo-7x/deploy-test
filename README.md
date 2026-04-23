@@ -11,7 +11,10 @@ that touches the deploy pipeline:
 - `@nuxthub/core` with `hub.blob: true` (and `@vercel/blob` as a peer)
 - Drizzle ORM + `postgres-js` driver
 - Migration-based schema plus a data-only seed migration with `WHERE NOT EXISTS`
-- `better-auth` with conditional OAuth providers + email toggle + opt-in default admin
+- `better-auth` with conditional OAuth providers + email toggle +
+  `SYSTEM_ADMIN_EMAILS`-driven first-admin-wins (no seed credentials, no
+  default password)
+- Cloudflare Hyperdrive binding for Postgres on the Workers preset
 - Tailwind v4 build pipeline
 - `vercel.json` with build-time migrate
 
@@ -29,12 +32,10 @@ https://vercel.com/new/clone
   ?repository-url=https%3A%2F%2Fgithub.com%2F<your-github>%2F<repo>
   &project-name=deploy-test
   &repository-name=deploy-test
-  &env=DATABASE_URL,BETTER_AUTH_SECRET
-  &envDescription=DATABASE_URL%3A%20Postgres%20connection%20string%20(Neon%20or%20Supabase%20from%20the%20Vercel%20Marketplace%20works%20out%20of%20the%20box).%20BETTER_AUTH_SECRET%3A%2032%2B%20char%20random%20string%20(%60openssl%20rand%20-hex%2032%60).
+  &env=DATABASE_URL,BETTER_AUTH_SECRET,SYSTEM_ADMIN_EMAILS
+  &envDescription=DATABASE_URL%3A%20Postgres%20connection%20string.%20BETTER_AUTH_SECRET%3A%2032%2B%20char%20random%20string%20(%60openssl%20rand%20-hex%2032%60).%20SYSTEM_ADMIN_EMAILS%3A%20your%20email%20—%20signing%20up%20with%20it%20auto-promotes%20you%20to%20admin.
   &envLink=https%3A%2F%2Fgithub.com%2F<your-github>%2F<repo>%2Fblob%2Fmain%2FREADME.md
 ```
-
-Also set `SEED_DEFAULT_ADMIN=true` if you want an instant-login admin account.
 
 Build-time migration is wired in `vercel.json` — `pnpm migrate && pnpm build`.
 If the migration fails, the deploy fails loud, leaving the previous version
@@ -45,10 +46,12 @@ serving traffic.
 ```
 wrangler login
 pnpm install
+# Create a Hyperdrive config pointing at your Postgres, paste the id into
+# wrangler.toml, then:
 pnpm build:cf
 wrangler --cwd .output deploy
-wrangler secret put DATABASE_URL
 wrangler secret put BETTER_AUTH_SECRET
+wrangler secret put SYSTEM_ADMIN_EMAILS   # recommended: your email
 ```
 
 ### Docker
@@ -57,7 +60,7 @@ wrangler secret put BETTER_AUTH_SECRET
 docker run -d -p 3000:3000 \
   -e DATABASE_URL=postgresql://user:pass@host:5432/db \
   -e BETTER_AUTH_SECRET=$(openssl rand -hex 32) \
-  -e SEED_DEFAULT_ADMIN=true \
+  -e SYSTEM_ADMIN_EMAILS=you@example.com \
   <your-image>
 ```
 
@@ -65,22 +68,25 @@ docker run -d -p 3000:3000 \
 
 | Variable | Required? | Purpose |
 |---|---|---|
-| `DATABASE_URL` | **yes** | Postgres connection string |
+| `DATABASE_URL` | **yes** (except CF, which uses Hyperdrive binding) | Postgres connection string |
 | `BETTER_AUTH_SECRET` | **yes** | 32+ char random string |
-| `SEED_DEFAULT_ADMIN` | no | `true` seeds `admin@deploy-test.local` / `changedefaultpassword` |
+| `SYSTEM_ADMIN_EMAILS` | recommended | Comma-separated emails. First sign-up with a matching email becomes admin. Defaults to `admin@admin.local`. |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | no | Google OAuth |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | no | GitHub OAuth |
-| `AUTH_EMAIL_ENABLED` | no | Force-toggle email login |
+| `AUTH_EMAIL_ENABLED` | no | Force-toggle email+password. Defaults to: enabled iff no OAuth is configured. |
+| `NUXT_RESEND_API_KEY` | no | When set, email verification auto-activates on signup. |
 
-With just the two required variables + `SEED_DEFAULT_ADMIN=true`, a fresh
-deploy boots, auto-seeds 3 welcome items + an admin account, and is
-immediately loginable.
+With just the two required variables, a fresh deploy boots, auto-seeds 3
+welcome items, and is immediately usable. To claim admin: sign up with an
+email in `SYSTEM_ADMIN_EMAILS` (default `admin@admin.local`) — the first user
+created with a matching email is promoted to `role=admin` on creation.
+**Change `SYSTEM_ADMIN_EMAILS` to your own email before inviting anyone.**
 
 ## Local dev
 
 ```
 pnpm install
-cp .env.example .env   # fill DATABASE_URL + BETTER_AUTH_SECRET
+cp .env.example .env   # fill DATABASE_URL + BETTER_AUTH_SECRET + SYSTEM_ADMIN_EMAILS
 pnpm migrate
 pnpm dev               # http://localhost:3000
 ```
