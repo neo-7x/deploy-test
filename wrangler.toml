@@ -3,20 +3,20 @@ main = "./.output/server/index.mjs"
 compatibility_date = "2025-07-15"
 compatibility_flags = ["nodejs_compat"]
 
-# CF Workers Builds hook — CF runs `pnpm install && pnpm build:cf` before
-# `wrangler deploy` so the cloudflare-module preset output lands in .output/.
-[build]
-command = "pnpm build:cf"
-
-# Runtime secrets are set via `wrangler secret put` or the CF dashboard:
-#   DATABASE_URL
-#   BETTER_AUTH_SECRET
-#   SEED_DEFAULT_ADMIN (optional)
+# Hyperdrive pools + caches Postgres connections at the edge — required for
+# Workers since they can't hold long-lived TCP pools of their own.
 #
-# To bind a Hyperdrive for Postgres instead of a public DATABASE_URL:
-# [[hyperdrive]]
-# binding = "HYPERDRIVE"
-# id = "<your-hyperdrive-id>"
+# Before deploy, create the binding:
+#   wrangler hyperdrive create deploy-test \
+#     --connection-string="postgresql://USER:PASS@HOST:5432/DB"
+# then paste the returned id below.
+[[hyperdrive]]
+binding = "POSTGRES"
+id = "dc6fb35f7e294fe5abafccacf7cf6b53"
+
+# BETTER_AUTH_SECRET is set via `wrangler secret put BETTER_AUTH_SECRET`.
+# DATABASE_URL is NOT needed on Cloudflare — the Hyperdrive binding above
+# replaces it.
 
 [assets]
 directory = "./.output/public/"
