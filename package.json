@@ -37,37 +37,40 @@
   "cloudflare": {
     "bindings": {
       "POSTGRES": {
-        "description": "Hyperdrive config pointing at your Postgres. Create one first via `wrangler hyperdrive create deploy-test --connection-string=\"postgresql://USER:PASS@HOST:5432/DB\"`, then pick it here. See [docs](https://developers.cloudflare.com/hyperdrive/)."
+        "description": "Hyperdrive config pointing at your Postgres. [Create one first](https://developers.cloudflare.com/hyperdrive/) with `wrangler hyperdrive create`, then select it here."
+      },
+      "DATABASE_URL": {
+        "description": "**Not used on Cloudflare Workers.** The `POSTGRES` Hyperdrive binding above replaces it. Leave this blank (any value is ignored at runtime)."
       },
       "BETTER_AUTH_SECRET": {
         "description": "Session / cookie encryption secret. **Required**. Generate a 32+ char random string with `openssl rand -hex 32`."
       },
       "SYSTEM_ADMIN_EMAILS": {
-        "description": "Comma-separated emails. The **first** sign-up with a matching email is auto-promoted to admin — no seed account, no default password. Example: `you@example.com`. Change this before sharing the deploy URL."
+        "description": "Comma-separated emails. The **first** sign-up with a matching email is auto-promoted to admin. Example: `you@example.com`. Change before sharing the deploy URL."
       },
       "GOOGLE_CLIENT_ID": {
-        "description": "Optional. Google OAuth client ID. Create one at [Google Cloud Console](https://console.cloud.google.com/auth/clients/create) with redirect URI `https://<your-worker>.workers.dev/api/auth/callback/google`."
+        "description": "Optional. Google OAuth client ID. Create at [console.cloud.google.com](https://console.cloud.google.com/auth/clients/create) with redirect `https://<your-worker>.workers.dev/api/auth/callback/google`."
       },
       "GOOGLE_CLIENT_SECRET": {
         "description": "Optional. Paired with `GOOGLE_CLIENT_ID`."
       },
       "GITHUB_CLIENT_ID": {
-        "description": "Optional. GitHub OAuth client ID. Create an app at [GitHub Developer Settings](https://github.com/settings/applications/new) with callback URL `https://<your-worker>.workers.dev/api/auth/callback/github`."
+        "description": "Optional. GitHub OAuth client ID. Create at [github.com/settings/applications/new](https://github.com/settings/applications/new) with callback `https://<your-worker>.workers.dev/api/auth/callback/github`."
       },
       "GITHUB_CLIENT_SECRET": {
         "description": "Optional. Paired with `GITHUB_CLIENT_ID`."
       },
       "AUTH_EMAIL_ENABLED": {
-        "description": "Optional. Force-toggle email+password login. Values: `true` / `false`. Default: enabled iff no OAuth is configured."
+        "description": "Optional. `true` / `false`. Default: enabled iff no OAuth is configured."
       },
       "RESEND_API_KEY": {
-        "description": "Optional. Resend API key. When set, email verification auto-activates on signup. Get one at [resend.com/api-keys](https://resend.com/api-keys)."
+        "description": "Optional. When set, email verification auto-activates on signup. Get one at [resend.com/api-keys](https://resend.com/api-keys)."
       },
       "RESEND_FROM": {
-        "description": "Optional. From address for verification mails. Defaults to `onboarding@resend.dev` (only delivers to the Resend account owner's inbox until you verify a custom domain)."
+        "description": "Optional. From address for verification mails. Defaults to `onboarding@resend.dev`."
       },
       "AUTH_EMAIL_VERIFICATION": {
-        "description": "Optional. Force-toggle email verification. Values: `true` / `false`. Default: enabled iff email login is on and `RESEND_API_KEY` is set."
+        "description": "Optional. `true` / `false`. Default: enabled iff email login is on and `RESEND_API_KEY` is set."
       }
     }
   },
