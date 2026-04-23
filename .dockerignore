@@ -1,0 +1,14 @@
+.git
+.gitignore
+node_modules
+.nuxt
+.output
+.vercel
+.wrangler
+.data
+.env
+.env.*
+*.log
+.DS_Store
+README.md
+VERIFIED.md

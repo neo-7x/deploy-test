@@ -1,0 +1,21 @@
+name = "deploy-test"
+main = "./.output/server/index.mjs"
+compatibility_date = "2025-07-15"
+compatibility_flags = ["nodejs_compat"]
+
+# Runtime secrets are set via `wrangler secret put` or the CF dashboard:
+#   DATABASE_URL
+#   BETTER_AUTH_SECRET
+#   SEED_DEFAULT_ADMIN (optional)
+#
+# To bind to a Hyperdrive for Postgres instead of a public DATABASE_URL:
+# [[hyperdrive]]
+# binding = "HYPERDRIVE"
+# id = "<your-hyperdrive-id>"
+
+[assets]
+directory = "./.output/public/"
+binding = "ASSETS"
+
+[observability]
+enabled = true

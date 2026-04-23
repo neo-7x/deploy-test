@@ -1,0 +1,45 @@
+{
+  "name": "deploy-test",
+  "type": "module",
+  "private": true,
+  "description": "Minimal Nuxt 4 + Postgres + better-auth starter for validating one-click deploy flows (Vercel / Cloudflare Workers / Docker).",
+  "scripts": {
+    "build": "nuxt build && mkdir -p .output/server/db && cp -r server/db/migrations .output/server/db/migrations",
+    "build:cf": "NITRO_PRESET=cloudflare-module nuxt build",
+    "build:vercel": "NITRO_PRESET=vercel nuxt build",
+    "dev": "nuxt dev",
+    "generate:migration": "drizzle-kit generate",
+    "migrate": "drizzle-kit migrate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxt/fonts": "0.14.0",
+    "@nuxt/icon": "2.2.1",
+    "@nuxthub/core": "0.10.7",
+    "@vercel/blob": "^2.3.3",
+    "@vueuse/core": "^14.2.1",
+    "better-auth": "1.5.4",
+    "drizzle-kit": "^0.31.9",
+    "drizzle-orm": "^0.45.1",
+    "nuxt": "^4.3.1",
+    "postgres": "^3.4.8",
+    "uuidv7": "^1.1.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@iconify-json/lucide": "^1.2.98",
+    "@nuxtjs/tailwindcss": "7.0.0-beta.1",
+    "@types/node": "^25.3.5",
+    "tailwindcss": "^4.2.1",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@10.15.0",
+  "pnpm": {
+    "supportedArchitectures": {
+      "os": ["current", "linux"],
+      "cpu": ["current", "x64", "arm64"],
+      "libc": ["current", "glibc"]
+    }
+  }
+}
