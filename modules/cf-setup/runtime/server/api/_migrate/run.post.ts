@@ -12,7 +12,13 @@ import { resolveConnectionString } from '../../utils/connection-string'
 //     traffic.
 //   - migrated state: no-op, but still gated by admin to avoid info leaks.
 
+function isCloudflare(): boolean {
+  const p = import.meta.preset
+  return p === 'cloudflare-module' || p === 'cloudflare-pages'
+}
+
 export default defineEventHandler(async (event) => {
+  if (!isCloudflare()) throw createError({ statusCode: 404 })
   const connectionString = resolveConnectionString()
   if (!connectionString) {
     throw createError({

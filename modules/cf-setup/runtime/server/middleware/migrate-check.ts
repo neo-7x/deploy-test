@@ -22,7 +22,14 @@ function shouldBypass(path: string): boolean {
   )
 }
 
+function isCloudflare(): boolean {
+  const p = import.meta.preset
+  return p === 'cloudflare-module' || p === 'cloudflare-pages'
+}
+
 export default defineEventHandler(async (event) => {
+  if (!isCloudflare()) return
+
   const path = getRequestURL(event).pathname
 
   if (shouldBypass(path)) return

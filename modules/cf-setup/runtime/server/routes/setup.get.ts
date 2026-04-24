@@ -225,7 +225,13 @@ function safeRedirectTarget(event: Parameters<typeof getQuery>[0]): string {
   return candidate.startsWith('/') && !candidate.startsWith('//') ? candidate : '/'
 }
 
+function isCloudflare(): boolean {
+  const p = import.meta.preset
+  return p === 'cloudflare-module' || p === 'cloudflare-pages'
+}
+
 export default defineEventHandler(async (event) => {
+  if (!isCloudflare()) throw createError({ statusCode: 404 })
   const query = getQuery(event)
   // DEBUG-ONLY: ?force_setup=1 bypasses the migrated-state guard so we can
   // eyeball the page after installation is complete. Break the invariant on

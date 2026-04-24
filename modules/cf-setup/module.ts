@@ -5,31 +5,24 @@ import { addServerHandler, createResolver, defineNuxtModule } from '@nuxt/kit'
 // CF Workers have no real "startup phase": async work at module init is not
 // tied to the fetch lifecycle and dies when the first request returns. That
 // breaks the usual "migrate DB before listen" pattern. This module adds a
-// CF-only /setup page + /api/_migrate endpoints + a request hook that
+// CF-only /setup page + /api/_migrate endpoints + a request middleware that
 // detects unmigrated state and redirects to /setup.
 //
-// The module is a no-op on non-Cloudflare presets, so Docker and Vercel
-// builds neither bundle these routes nor register the hook.
+// Why always register instead of gating on preset at setup() time: on CF
+// Workers Builds, NITRO_PRESET isn't set as an env var and the Nitro preset
+// ends up on nuxt.options only after @nuxthub/core resolves it at a later
+// hook than where our module.setup() runs. Registering unconditionally and
+// short-circuiting inside each handler via `import.meta.preset` is more
+// robust — the cost is a few KB of dead code on non-CF bundles.
 
 export default defineNuxtModule({
   meta: {
     name: 'cf-setup',
     configKey: 'cfSetup',
   },
-  setup(_options, nuxt) {
-    const preset = process.env.NITRO_PRESET ?? nuxt.options.nitro?.preset ?? ''
-    const isCloudflare =
-      typeof preset === 'string' &&
-      (preset.startsWith('cloudflare') || preset.startsWith('cloudflare_'))
-
-    if (!isCloudflare) {
-      return
-    }
-
+  setup() {
     const resolver = createResolver(import.meta.url)
 
-    // /setup is served as pure HTML from a server route — no Vue runtime,
-    // no hydration, works on the very first cold request.
     addServerHandler({
       route: '/setup',
       method: 'get',
